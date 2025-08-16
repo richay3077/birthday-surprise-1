@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy Birthday Bubu!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #fefefe;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      position: relative;
+    }
+    #landing, #quiz, #game, #memories, #love-letter {
+      display: none;
+      padding: 20px;
+      position: relative;
+    }
+    #landing { display: block; }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 10px;
+      background: #ff3366;
+      color: white;
+      border: none;
+      transition: 0.3s;
+    }
+    button:hover {
+      transform: scale(1.1);
+      background: #ff6699;
+    }
+    .memory-img {
+      max-width: 300px;
+      max-height: 300px;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      object-fit: cover;
+      position: relative;
+      z-index: 1;
+    }
+    #hearts-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(200px) scale(0.5); opacity: 0; }
+    }
+    .heart {
+      position: absolute;
+      font-size: 20px;
+      animation: floatDown 4s linear forwards;
+      user-select: none;
+      pointer-events: none;
+    }
+    @keyframes floatDown {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+    }
+    #letter-text {
+      font-family: 'Brush Script MT', cursive, Arial, sans-serif;
+      font-size: 22px;
+      opacity: 0;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      transition: opacity 2s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="bg-music" src="audio/mai koi aisa geet.mp3"></audio>
+
+  <!-- ❤️ Hearts -->
+  <div id="hearts-container"></div>
+
+  <!-- Landing -->
+  <div id="landing">
+    <h1 id="landing-text">It's your special day! 🎉</h1>
+    <p id="landing-question">Do you wanna see what I made for you? 💖</p>
+    <div id="landing-buttons">
+      <button id="btn-yes">Yes 😍</button>
+      <button id="btn-no">No 😢</button>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div id="quiz">
+    <h2>Quiz Time! 📝</h2>
+    <div id="question-text"></div>
+    <div id="options"></div>
+    <p id="feedback" style="font-weight:bold;color:#ff3366;"></p>
+  </div>
+
+  <!-- Game -->
+  <div id="game">
+    <h2>Catch the Hearts ❤️ (Arrow keys or touch)</h2>
+    <canvas id="gameCanvas" width="600" height="400" style="border:1px solid #333;"></canvas>
+  </div>
+
+  <!-- Memories -->
+  <div id="memories">
+    <h2>Our Memories 🥰</h2>
+    <img id="memory-img" class="memory-img" src="" alt="Memory" onerror="this.src='images/placeholder.jpg';">
+    <p id="memory-caption"></p>
+    <button id="prev-memory">Previous</button>
+    <button id="next-memory">Next</button>
+  </div>
+
+  <!-- Love Letter -->
+  <div id="love-letter">
+    <p id="letter-text"></p>
+  </div>
+
+<script>
+  const music = document.getElementById('bg-music');
+  music.volume = 0.3;
+
+  // ❤️ Heart Animation
+  let heartInterval;
+  function spawnHeartMemories() {
+    const container = document.getElementById('hearts-container');
+    const heart = document.createElement('span');
+    heart.innerText = '❤️';
+    heart.className = 'heart';
+    heart.style.left = Math.random() * 90 + '%';
+    heart.style.fontSize = (10 + Math.random() * 20) + 'px';
+    container.appendChild(heart);
+    setTimeout(() => {
+      if(container.contains(heart)) container.removeChild(heart);
+    }, 4000);
+  }
+  function startHeartAnimation() {
+    if (!heartInterval) {
+      heartInterval = setInterval(spawnHeartMemories, 300);
+    }
+  }
+  function stopHeartAnimation() {
+    clearInterval(heartInterval);
+    heartInterval = null;
+  }
+
+  // Landing Flow
+  function showStep(step){
+    const text = document.getElementById('landing-text');
+    const question = document.getElementById('landing-question');
+    const btnDiv = document.getElementById('landing-buttons');
+
+    if(step===1){
+      text.innerText="Surprise adventure begins! 🎁";
+      question.innerText="";
+      btnDiv.innerHTML='<button id="btn-lights">Lights On 💡</button>';
+      document.getElementById('btn-lights').addEventListener('click', ()=>{
+        document.body.style.backgroundColor = "#fff9e6";
+        text.innerText="Lights are ON! 💡";
+        setTimeout(()=>showStep(2),1000);
+      });
+    } else if(step===2){
+      text.innerText="Click below to play music 🎵";
+      btnDiv.innerHTML='<button id="btn-music">Play Music 🎶</button>';
+      document.getElementById('btn-music').addEventListener('click', ()=>{
+        music.play();
+        text.innerText="Music is playing! 🎶";
+        setTimeout(()=>showStep(3),1000);
+      });
+    } else if(step===3){
+      text.innerText="Decorate the page 🎈🎊";
+      btnDiv.innerHTML='<button id="btn-decorate">Decorate ✨</button>';
+      document.getElementById('btn-decorate').addEventListener('click', ()=>{
+        const flyer = document.createElement('div');
+        flyer.innerHTML='<h1 style="color:#ff3366;font-size:48px;">Happy Birthday Bubu!!! 🎉❤️</h1>';
+        flyer.style.textAlign='center';
+        document.getElementById('landing').appendChild(flyer);
+        document.body.style.backgroundColor="#ffe6f2";
+
+        startHeartAnimation(); // 💖 Start hearts here
+
+        setTimeout(()=>showStep(4),1500);
+      });
+    } else if(step===4){
+      text.innerText="I love you and missing you more today 💖";
+      btnDiv.innerHTML='<button id="btn-start-quiz">Start Quiz 📝</button>';
+      document.getElementById('btn-start-quiz').addEventListener('click', ()=>{
+        document.getElementById('landing').style.display='none';
+        startQuiz();
+      });
+    }
+  }
+
+  document.getElementById('btn-yes').addEventListener('click', ()=>showStep(1));
+  document.getElementById('btn-no').addEventListener('click', ()=>{alert("Oh no! But Bubu will love this surprise anyway 😏");});
+
+  // Quiz Data
+  const quizQuestions=[
+    {q:"When did we first meet?", options:["21st June 2023","22nd June 2023","25th June 2023","28th June 2023"], answer:2},
+    {q:"When did Bubu and Baby have their first kiss 💋?", options:["2nd August 2023","2nd September 2023","4th September 2023","11th September 2023"], answer:1},
+    {q:"What is Baby’s favourite body part of Bubu 😳?", options:["Eyes","Lips","Ding-ding","Stomach ka side part"], answer:3},
+    {q:"Which of Bubu’s lines irritates Baby the most?", options:["Tham ja thodi der","Dekhte hain","Kar lenge baad mein","Neend aa rahi, soote hain"], answer:1},
+    {q:"What does Baby want from Bubu? 💖", options:["Time","All of his attention","Cuddles and making love","Emotional availability","All of these"], answer:4},
+    {q:"Who says “I love you” more often? ❤️", options:["Baby","Bubu’s Baby","Bubu’s girlfriend","Richa"], answer:1},
+    {q:"If Bubu was a programming language, Baby would be…? 💻❤️", options:["Compiler","Bug","Framework","Error 404"], answer:0},
+    {q:"If our love was on GitHub, what would the repo name be? 🐙💕", options:["forever-us","bubu-x-baby","love_private_repo","bugs-and-hugs"], answer:0},
+    {q:"If Baby had one superpower, what would she use it for? 🦸‍♀️", options:["Teleport to Bubu instantly ✈️","Read Bubu’s mind 🤯","Never let Bubu sleep without saying I love you","Create infinite cuddles 💕"], answer:0},
+    {q:"If Baby found a bug in Bubu’s “love code”, what would it be? 🐞❤️", options:["Too many “Dekhte hain” statements 😏","Missing I love you semicolons 💕","Infinite loop of cuddles 🤗","No bugs, Bubu’s code is perfect 😍"], answer:0}
+  ];
+  let currentQ=0;
+  function startQuiz(){
+    document.getElementById('quiz').style.display='block';
+    showQuestion();
+  }
+  function showQuestion(){
+    const q=quizQuestions[currentQ];
+    document.getElementById('question-text').innerText=q.q;
+    const optionsDiv=document.getElementById('options');
+    optionsDiv.innerHTML='';
+    q.options.forEach((opt,i)=>{
+      const btn=document.createElement('button');
+      btn.innerText=opt;
+      btn.addEventListener('click',()=>checkAnswer(i));
+      optionsDiv.appendChild(btn);
+    });
+  }
+  function checkAnswer(i){
+    const q=quizQuestions[currentQ];
+    const feedback=document.getElementById('feedback');
+    if(i===q.answer){
+      feedback.innerText = "Correct! 🎉";
+      currentQ++;
+      setTimeout(()=>{
+        feedback.innerText='';
+        if(currentQ<quizQuestions.length){ showQuestion(); }
+        else { 
+          document.getElementById('quiz').style.display='none'; 
+          startGame(); 
+        }
+      },1000);
+    } else {
+      feedback.innerText = "Bubu you are wrong, think again!!!";
+    }
+  }
+
+  // Game
+  function startGame(){
+    document.getElementById('game').style.display='block';
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let hearts=[], score=0;
+    const basket = { x:250, y:370, width:100, height:20, speed:15 };
+    document.addEventListener('keydown', (e)=>{
+      if(e.key==='ArrowLeft'){ basket.x=Math.max(0,basket.x-basket.speed); }
+      if(e.key==='ArrowRight'){ basket.x=Math.min(canvas.width-basket.width,basket.x+basket.speed); }
+    });
+    canvas.addEventListener('touchstart', handleTouch);
+    canvas.addEventListener('touchmove', handleTouch);
+    function handleTouch(e){
+      e.preventDefault();
+      let touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+      basket.x = Math.min(Math.max(0, touchX - basket.width/2), canvas.width - basket.width);
+    }
+    function createHeart(){
+      return {x: Math.random()*(canvas.width-30)+15, y:0, size:20, speed: (3 + Math.random()*3)};
+    }
+    function drawBasket(){
+      ctx.fillStyle = '#ff3366';
+      ctx.fillRect(basket.x,basket.y,basket.width,basket.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '18px Arial';
+      ctx.fillText('Catch ❤️', basket.x + 10, basket.y + 15);
+    }
+    function drawHearts(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      drawBasket();
+      for(let i=hearts.length-1; i>=0; i--){
+        let h = hearts[i];
+        ctx.font = `${h.size}px Arial`;
+        ctx.fillText('❤️', h.x, h.y);
+        h.y += h.speed;
+        if(h.y > basket.y && h.x > basket.x && h.x < basket.x + basket.width){
+          hearts.splice(i,1);
+          score++;
+        } else if(h.y > canvas.height){
+          hearts.splice(i,1);
+        }
+      }
+      ctx.fillStyle = '#ff3366';
+      ctx.font = '20px Arial';
+      ctx.fillText('Score: '+score, 10, 25);
+      if(score >= 10){
+        setTimeout(()=>{
+          document.getElementById('game').style.display='none';
+          showMemories();
+        }, 1500);
+      }
+    }
+    setInterval(()=>{
+      if(hearts.length < 5){
+        hearts.push(createHeart());
+      }
+      drawHearts();
+    }, 30);
+  }
+
+  // Memories
+  const memories = [
+    {img:'images/m1.jpg', caption:'Our first outing together! 🥰'},
+    {img:'images/m2.jpg', caption:'Skincare time'},
+    {img:'images/m3.jpg', caption:'Adventerous Ice skating😄'},
+    {img:'images/m4.jpg', caption:'One year of togetherness❤️'},
+    {img:'images/m5.jpg', caption:'First New year together💕'},
+    {img:'images/m6.jpg', caption:'Our silly Photo 🤪📸'},
+    {img:'images/m7.jpg', caption:'My Little Kiddo'},
+    {img:'images/m8.jpg', caption:'Two years of cuddles, fights, and lots of love and this will continue forever...❤️'},
+    {img:'images/m9.jpg', caption:'My most favourite and precious gift💖'},
+    {img:'images/m10.jpg', caption:'Mera personal SRK and your forever fan always behind you🤗💗'},
+    {img:'images/m11.jpg', caption:'Every moment with you is magic🎉❤️'},
+    {img:'images/m12.jpg', caption:'Our Dinner Date✨💞'}
+  ];
+  let memoryIndex=0;
+  function showMemories(){
+    document.getElementById('memories').style.display='block';
+    updateMemory();
+  }
+  function updateMemory(){
+    const img = document.getElementById('memory-img');
+    const cap = document.getElementById('memory-caption');
+    img.src = memories[memoryIndex].img;
+    cap.innerText = memories[memoryIndex].caption;
+  }
+  document.getElementById('prev-memory').addEventListener('click', ()=>{
+    memoryIndex = (memoryIndex-1 + memories.length) % memories.length;
+    updateMemory();
+  });
+  document.getElementById('next-memory').addEventListener('click', ()=>{
+    memoryIndex = (memoryIndex+1) % memories.length;
+    updateMemory();
+  });
+  document.getElementById('next-memory').addEventListener('click', ()=>{
+    if(memoryIndex === memories.length - 1){
+      setTimeout(()=>{
+        document.getElementById('memories').style.display = 'none';
+        showLoveLetter();
+      }, 800);
+    }
+  });
+
+  // Love Letter
+  const finalMessage = `🎉🎂 Happy Birthday Bubu, My Love!! 🎂🎉
+
+Today isn't just your Birthday - it's a reminder of how lucky I am to walk through life with you. You are so many things in one incredible man. You carry more than anyone realizes, and still somehow give so much of yourself to everyone around you. 💪❤️
+
+You are the one person I can always count on every single time. You are my home and my favourite teammate in all of life's chaos. 🏠🤗
+
+Today I hope you feel celebrated for everything you are. You deserve joy, rest, laughter, love - and maybe even a nap without interruptions. 😄💤
+
+You inspire me to be a better person, someone worthy of having you as a partner - I guess I am just happy counting my blessings, god couldn't have been kinder to me. 🙏✨
+
+I LOVE YOU so much my Bubu, much more than words can fully express, but I will spend my life trying to show you. 💖🔥
+
+HAPPY BIRTHDAY LOVE!!! 🎈🎉🥳
+
+Distance can't stop my love for you, forever yours - Richa 💌💕`;
+
+  function showLoveLetter(){
+    document.getElementById('love-letter').style.display='block';
+    const letter = document.getElementById('letter-text');
+    letter.style.opacity = 0;
+    letter.innerText = finalMessage;
+    setTimeout(() => {
+      letter.style.opacity = 1;
+    }, 500);
+    stopHeartAnimation();
+  }
+
+</script>
+</body>
+</html>
